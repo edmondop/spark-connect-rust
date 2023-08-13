@@ -1,0 +1,98 @@
+on:
+  push:
+
+name: Check and Lint
+
+env:
+  PROTOC_VERSION: 23.x
+
+jobs:
+  check:
+    name: Check And Clippy
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - uses: actions-rs/toolchain@v1
+        with:
+          components: clippy
+          toolchain: stable
+          override: true
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v2
+        with:
+          version: ${{env.PROTOC_VERSION}}
+      - uses: actions-rs/cargo@v1
+        with:
+          command: check
+      - uses: actions-rs/clippy-check@v1
+        with:
+            token: ${{ secrets.GITHUB_TOKEN }}
+            args: --all-features
+            name: Clippy Output
+
+  fmt:
+    name: Rustfmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - run: rustup component add rustfmt
+      - uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all -- --check
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: cargo-make
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v2
+        with:
+          version: ${{env.PROTOC_VERSION}}
+      - uses: actions-rs/cargo@v1
+        with:
+          command: make
+          args: integration_test

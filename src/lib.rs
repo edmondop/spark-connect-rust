@@ -1,19 +1,11 @@
-use tonic;
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
 pub mod spark {
-    //tonic::include_proto!("spark.connect");
+    tonic::include_proto!("spark.connect");
 }
 
+mod arrow;
+pub mod dataframe;
+pub mod error;
+mod plan;
+mod session;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+pub use session::RemoteSparkSession;

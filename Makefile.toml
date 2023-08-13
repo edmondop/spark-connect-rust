@@ -1,0 +1,17 @@
+[tasks.setup]
+command = "docker-compose"
+args = ["--env-file", ".docker_compose_env", "up", "-d"]
+
+[tasks.cleanup]
+command = "docker-compose"
+args = ["--env-file", ".docker_compose_env", "down"]
+
+[tasks.integration_test]
+dependencies = ["setup"]
+command = "cargo"
+args = ["test", "--tests"]
+finally = ["cleanup"]
+
+[tasks.unit_test]
+command = "cargo"
+args = ["test", "--lib"]
