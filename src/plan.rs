@@ -33,7 +33,6 @@ impl Plan for SqlPlan {
             rel_type: Some(spark::relation::RelType::Sql(spark::Sql {
                 query: self.query.to_string(),
                 args: HashMap::new(),
-                pos_args: vec![],
             })),
         }
     }
@@ -48,7 +47,6 @@ impl Plan for SqlPlan {
 impl Plan for NamedTableReadPlan {
     fn collect(&self) -> spark::Relation {
         let read_relation = spark::Read {
-            is_streaming: false,
             read_type: Some(ReadType::NamedTable(spark::read::NamedTable {
                 unparsed_identifier: self.table_name.clone(),
                 options: self.options.clone(),
@@ -71,7 +69,6 @@ impl Plan for NamedTableReadPlan {
 impl Plan for LoadPlan {
     fn collect(&self) -> spark::Relation {
         let read_relation = spark::Read {
-            is_streaming: false,
             read_type: Some(ReadType::DataSource(spark::read::DataSource {
                 paths: self.paths.clone(),
                 schema: self.schema.clone(),

@@ -72,7 +72,6 @@ impl RemoteSparkSession {
             session_id: self.session_id.clone(),
             client_type: self.context.as_ref().map(|ctx| ctx.client_type.clone()),
             user_context: self.internal_user_context(),
-            request_options: vec![],
             plan: Some(spark::Plan {
                 op_type: Some(opt_type),
             }),

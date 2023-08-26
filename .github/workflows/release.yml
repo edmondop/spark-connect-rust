@@ -1,31 +1,40 @@
 on:
-    push:
-      tags:
-        - 'v*'
+  push:
+    tags:
+      - "v*"
 
 name: release
 
+env:
+  PROTOC_VERSION: 23.x
+
 jobs:
-    create-release:
-        name: create GitHub release
-        runs-on: ubuntu-latest
-        permissions:
-            contents: write
+  create-release:
+    name: create GitHub release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
-        steps:
-            - name: Release
-              uses: softprops/action-gh-release@v1
-              with:
-                prerelease: ${{ contains(github.ref, 'pre') || contains(github.ref, 'rc') }}
+    steps:
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          prerelease: ${{ contains(github.ref, 'pre') || contains(github.ref, 'rc') }}
 
-    publish:
-        needs:
-        - create-release
-        runs-on: ubuntu-latest
-        steps:
-        - uses: actions/checkout@v3
+  publish:
+    needs:
+      - create-release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
 
-        - name: publish to crates.io
-          run: |
-            echo ${{ secrets.CRATES_IO_TOKEN }} | cargo login
-            cargo publish
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v2
+        with:
+          version: ${{env.PROTOC_VERSION}}
+      - name: publish to crates.io
+        run: |
+          echo ${{ secrets.CRATES_IO_TOKEN }} | cargo login
+          cargo publish
