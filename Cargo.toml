@@ -1,6 +1,6 @@
 [package]
 name = "spark-connect-rust"
-version = "0.0.0"
+version = "0.0.1-alpha.1"
 edition = "2021"
 license-file = "LICENSE"
 description = "Implementation of Spark Connect in Rust"
